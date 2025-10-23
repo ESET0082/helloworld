@@ -1,19 +1,10 @@
-#syntax=docker/dockerfile:1
+from python:3.8-slim
 
-# builder installs dependencies and builds the node app
-FROM node:lts-alpine AS builder
-WORKDIR /src
-RUN --mount=src=package.json,target=package.json \
-    --mount=src=package-lock.json,target=package-lock.json \
-    --mount=type=cache,target=/root/.npm \
-    npm ci
-COPY . .
-RUN --mount=type=cache,target=/root/.npm \
-    npm run build
+workdir /app
 
-# release creates the runtime image
-FROM node:lts-alpine AS release
-WORKDIR /app
-COPY --from=builder /src/build .
-EXPOSE 3000
-CMD ["node", "."]
+copy . /app
+
+run pip install --no-cache-dir -r requirements.txt
+
+cmd ["python", "main.py"]
+ 
